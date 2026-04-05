@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ChaoticLoader from "./components/ChaoticLoader";
 import CustomCursor from "./components/CustomCursor";
 import Editor from "./components/Editor";
-import HexBackground from "./components/HexBackground";
 import OutputPanel from "./components/OutputPanel";
 import StatusBar from "./components/StatusBar";
 import TerminalPanel from "./components/TerminalPanel";
@@ -157,7 +156,6 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-bg-primary text-[var(--text-primary)]">
-      <HexBackground persona={selectedCompiler.id} />
       {!isTouchPrimary && <CustomCursor persona={selectedCompiler.id} />}
 
       <div

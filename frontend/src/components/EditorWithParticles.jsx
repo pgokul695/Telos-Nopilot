@@ -55,14 +55,6 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
     }
   };
 
-  if (isTouchPrimary) {
-    return (
-      <div style={{ position: "relative", width: "100%", height: "100%" }}>
-        <MonacoEditor {...monacoProps} options={editorOptions} height="100%" width="100%" />
-      </div>
-    );
-  }
-
   const initParticles = (width, height) => {
     const palette = PERSONA_PALETTE[persona] || PERSONA_PALETTE.gcc;
     particlesRef.current = Array.from({ length: particleCount }, () => {
@@ -87,6 +79,10 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
   };
 
   useEffect(() => {
+    if (isTouchPrimary) {
+      return;
+    }
+
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) {
@@ -193,23 +189,38 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
       container.removeEventListener("mousemove", onMouseMove);
       container.removeEventListener("mouseleave", onMouseLeave);
     };
-  }, [particleCount, persona]);
+  }, [isTouchPrimary, particleCount, persona]);
 
   return (
     <div ref={containerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          zIndex: 10,
-        }}
-      />
+      {isTouchPrimary ? (
+        <HexOverlay
+          persona={persona}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        />
+      ) : (
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        />
+      )}
       <MonacoEditor
         {...monacoProps}
         onMount={handleEditorMount}
@@ -217,6 +228,50 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
         height="100%"
         width="100%"
       />
+    </div>
+  );
+}
+
+function HexOverlay({ persona, style }) {
+  const colorsByPersona = {
+    segfault: { stroke: "#00ff88", opacity: 0.13 },
+    gcc: { stroke: "#888888", opacity: 0.1 },
+    syntaxterror: { stroke: "#ff1a75", opacity: 0.14 },
+  };
+
+  const colors = colorsByPersona[persona] || colorsByPersona.gcc;
+  const patternId = `hex-${persona || "gcc"}`;
+
+  return (
+    <div aria-hidden="true" style={{ ...style, overflow: "hidden" }}>
+      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id={patternId} x="0" y="0" width="42" height="48.497" patternUnits="userSpaceOnUse">
+            <polygon
+              points="35,12.124 21,0 7,12.124 7,36.373 21,48.497 35,36.373"
+              fill="none"
+              stroke={colors.stroke}
+              strokeOpacity={colors.opacity}
+              strokeWidth="0.75"
+            />
+            <polygon
+              points="56,36.373 42,24.249 28,36.373 28,60.622 42,72.746 56,60.622"
+              fill="none"
+              stroke={colors.stroke}
+              strokeOpacity={colors.opacity}
+              strokeWidth="0.75"
+            />
+            <polygon
+              points="14,36.373 0,24.249 -14,36.373 -14,60.622 0,72.746 14,60.622"
+              fill="none"
+              stroke={colors.stroke}
+              strokeOpacity={colors.opacity}
+              strokeWidth="0.75"
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#${patternId})`} />
+      </svg>
     </div>
   );
 }
