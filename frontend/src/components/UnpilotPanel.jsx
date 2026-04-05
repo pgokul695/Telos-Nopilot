@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? ""
+    : "https://telosb.gokulp.online");
+
 function mapFenceLang(lang, fallback) {
   const value = String(lang || "").toLowerCase();
   if (value === "js" || value === "javascript") {
@@ -97,7 +103,7 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
     setInput("");
 
     try {
-      const response = await fetch("/api/unpilot-generate", {
+      const response = await fetch(`${API_BASE}/api/unpilot-generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

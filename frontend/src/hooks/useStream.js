@@ -1,5 +1,11 @@
 import { useCallback, useState } from "react";
 
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? ""
+    : "https://telosb.gokulp.online");
+
 export function useStream() {
   const [output, setOutput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -11,7 +17,7 @@ export function useStream() {
     setIsStreaming(true);
 
     try {
-      const response = await fetch("/api/generate", {
+      const response = await fetch(`${API_BASE}/api/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

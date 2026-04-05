@@ -21,4 +21,12 @@ Frontend:
   npm install
   npm run dev               # runs on http://localhost:3001
 
+Production hosts:
+  Frontend: https://telos.gokulp.online
+  Backend:  https://telosb.gokulp.online
+
+Frontend env:
+  cp .env.example .env
+  # VITE_API_BASE_URL defaults to https://telosb.gokulp.online
+
 Built for the April 7 hackathon. Ships nothing. Compiles everything.

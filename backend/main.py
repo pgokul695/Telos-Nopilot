@@ -162,9 +162,16 @@ class GenerateCodeRequest(BaseModel):
 
 app = FastAPI()
 
+FRONTEND_ORIGINS = [
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "https://telos.gokulp.online",
+    "http://telos.gokulp.online",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: lock to frontend URL in prod
+    allow_origins=FRONTEND_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
