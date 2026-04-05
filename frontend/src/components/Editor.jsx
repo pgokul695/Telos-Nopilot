@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import MonacoEditor from "@monaco-editor/react";
+import EditorWithParticles from "./EditorWithParticles";
 
 export const BAD_PYTHON_SNIPPET = `# // paste your code here. nopilot will handle the rest.
 
@@ -23,7 +23,7 @@ value = recurse_forever(0)
 print("done", value)
 # TODO: fix everything`;
 
-export default function Editor({ code, setCode, phase, selectedLanguage }) {
+export default function Editor({ code, setCode, phase, selectedLanguage, persona }) {
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
 
@@ -42,7 +42,8 @@ export default function Editor({ code, setCode, phase, selectedLanguage }) {
 
   return (
     <div className="relative h-full w-full overflow-hidden border-r" style={{ borderColor: "var(--border)" }}>
-      <MonacoEditor
+      <EditorWithParticles
+        persona={persona}
         height="100%"
         theme="vs-dark"
         language={selectedLanguage.monacoLang}
