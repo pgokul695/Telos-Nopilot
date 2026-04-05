@@ -124,7 +124,7 @@ export default function App() {
 
   const tabs = ["unpilot", "terminal", "output"];
   const isStacked = isMobile || isTablet;
-  const editorHeight = isMobile ? "45vh" : isTablet ? "55vh" : "auto";
+  const editorHeight = isMobile ? "35vh" : isTablet ? "38vh" : "auto";
 
   const handlePanelTouchStart = (event) => {
     if (!isMobile) {
@@ -181,14 +181,17 @@ export default function App() {
         />
 
         <main
-          className="min-h-0 flex-1"
+          className={`min-h-0 flex-1 ${isStacked ? "layout--stacked" : "layout--split"}`}
           style={
             isStacked
               ? { display: "flex", flexDirection: "column", overflow: "hidden" }
               : { display: "grid", gridTemplateColumns: "58% 42%", overflow: "hidden" }
           }
         >
-          <div style={isStacked ? { height: editorHeight, flexShrink: 0, minHeight: 0 } : { minHeight: 0 }}>
+          <div
+            className="editor-pane"
+            style={isStacked ? { height: editorHeight, flexShrink: 0, minHeight: 0 } : { minHeight: 0 }}
+          >
             <Editor
               code={code}
               setCode={setCode}

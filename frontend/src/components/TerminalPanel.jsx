@@ -3,6 +3,7 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import { motion } from "framer-motion";
+import { useBreakpoint } from "../hooks/useBreakpoint";
 
 const COMPILER_THEMES = {
   segfault: {
@@ -52,6 +53,7 @@ function escapeXterm(str) {
 }
 
 export default function TerminalPanel({ result, isRunning, statusMsg, selectedCompiler }) {
+  const { isMobile } = useBreakpoint();
   const containerRef = useRef(null);
   const termRef = useRef(null);
   const fitAddonRef = useRef(null);
@@ -64,7 +66,7 @@ export default function TerminalPanel({ result, isRunning, statusMsg, selectedCo
     const compilerTheme = COMPILER_THEMES[selectedCompiler?.id] || COMPILER_THEMES.syntaxterror;
     const term = new Terminal({
       fontFamily: '"JetBrains Mono", "Fira Code", monospace',
-      fontSize: 13,
+      fontSize: isMobile ? 12 : 13,
       lineHeight: 1.5,
       cursorStyle: "bar",
       cursorBlink: true,
@@ -97,7 +99,15 @@ export default function TerminalPanel({ result, isRunning, statusMsg, selectedCo
       termRef.current = null;
       fitAddonRef.current = null;
     };
-  }, []);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!termRef.current) {
+      return;
+    }
+    termRef.current.options.fontSize = isMobile ? 12 : 13;
+    fitAddonRef.current?.fit();
+  }, [isMobile]);
 
   useEffect(() => {
     if (!termRef.current || !selectedCompiler) {
@@ -265,7 +275,7 @@ export default function TerminalPanel({ result, isRunning, statusMsg, selectedCo
         </button>
       </div>
 
-      <div ref={containerRef} style={{ flex: 1, padding: "4px 4px 0 4px" }} />
+      <div ref={containerRef} className="terminal-output" style={{ flex: 1, padding: "4px 4px 0 4px" }} />
     </motion.div>
   );
 }

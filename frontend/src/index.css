@@ -188,13 +188,35 @@ select {
 }
 
 @media (max-width: 768px) {
-  .right-pane {
-    height: 45vh;
+  .panel-tab {
+    height: 44px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+}
+
+@media (max-width: 1024px) {
+  .layout--stacked .editor-pane {
+    height: 38vh;
     flex-shrink: 0;
+  }
+
+  .layout--stacked .right-pane {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 }
 
 @media (max-width: 480px) {
+  .layout--stacked .editor-pane {
+    height: 35vh;
+    flex-shrink: 0;
+  }
+
   .panel-tab {
     padding: 10px 12px;
     font-size: 10px;
@@ -212,6 +234,17 @@ select {
 
   .status-item--secondary {
     display: none;
+  }
+
+  .unpilot-messages {
+    font-size: 13px;
+    padding: 10px;
+    line-height: 1.55;
+  }
+
+  .terminal-output {
+    font-size: 12px;
+    padding: 10px;
   }
 }
 
