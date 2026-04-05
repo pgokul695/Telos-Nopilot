@@ -56,7 +56,7 @@ export default function FakeProgressBar({ compiler }) {
       return () => clearInterval(interval);
     }
 
-    const franticColors = ["#00ff88", "#ff3b3b", "#ffb800"];
+    const franticColors = ["#ff1a75", "#ff0066", "#ff4da6", "#ff3385", "#cc0052"];
     const interval = setInterval(() => {
       setFranticTick((prev) => prev + 1);
       setColor(franticColors[randomInt(0, franticColors.length - 1)]);
@@ -98,7 +98,12 @@ export default function FakeProgressBar({ compiler }) {
     return withPairs.replace("[rapidly incrementing number]", `${rapidBugs}`);
   }, [compiler.progressBarLabel, rapidBugs, progress]);
 
-  const barColor = compiler.progressBarBehavior === "slow" ? "#a78bfa" : compiler.progressBarBehavior === "crash" ? "#ff3b3b" : color;
+  const barColor =
+    compiler.progressBarBehavior === "slow"
+      ? "#a78bfa"
+      : compiler.progressBarBehavior === "crash"
+        ? compiler.accentColor
+        : color;
 
   return (
     <div className="w-full px-5">

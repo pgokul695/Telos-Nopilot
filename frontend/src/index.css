@@ -10,8 +10,8 @@
   --text-primary: #e8e8e8;
   --text-muted: #444444;
   --border: #1e1e1e;
-  --accent: #ff3b3b;
-  --accent-dim: #3b0000;
+  --accent: #00ff88;
+  --accent-dim: #001a0d;
   transition: --accent 600ms linear, --accent-dim 600ms linear;
 }
 

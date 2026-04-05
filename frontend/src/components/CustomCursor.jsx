@@ -1,34 +1,45 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const CURSOR_VARIANTS = {
   segfault: {
     size: 12,
-    color: "#ff3333",
+    color: "#00ff88",
     shape: "crosshair",
+    innerLerp: null,
+    outerLerp: null,
   },
   gcc: {
     size: 10,
     color: "#888888",
     shape: "dot",
+    innerLerp: null,
+    outerLerp: null,
   },
   syntaxterror: {
-    size: 14,
-    color: "#00ff88",
-    shape: "glitch",
+    innerSize: 7,
+    outerSize: 30,
+    color: "#ff1a75",
+    shape: "dualring",
+    innerLerp: 0.3,
+    outerLerp: 0.11,
   },
 };
 
 export default function CustomCursor({ persona }) {
   const cursorRef = useRef(null);
-  const posRef = useRef({ x: -100, y: -100 });
-  const smoothRef = useRef({ x: -100, y: -100 });
+  const innerRef = useRef(null);
+  const outerRef = useRef(null);
+  const mousePos = useRef({ x: -200, y: -200 });
+  const innerPos = useRef({ x: -200, y: -200 });
+  const outerPos = useRef({ x: -200, y: -200 });
+  const currentPos = useRef({ x: -200, y: -200 });
   const rafRef = useRef(null);
-
-  const variant = useMemo(() => CURSOR_VARIANTS[persona] || CURSOR_VARIANTS.gcc, [persona]);
+  const variant = CURSOR_VARIANTS[persona] || CURSOR_VARIANTS.gcc;
+  const isDualRing = variant.shape === "dualring";
 
   useEffect(() => {
     const onMove = (event) => {
-      posRef.current = { x: event.clientX, y: event.clientY };
+      mousePos.current = { x: event.clientX, y: event.clientY };
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -36,14 +47,31 @@ export default function CustomCursor({ persona }) {
     const lerp = (a, b, t) => a + (b - a) * t;
 
     const tick = () => {
-      const cursor = cursorRef.current;
-      if (cursor) {
-        smoothRef.current.x = lerp(smoothRef.current.x, posRef.current.x, 0.18);
-        smoothRef.current.y = lerp(smoothRef.current.y, posRef.current.y, 0.18);
-        const x = smoothRef.current.x - variant.size;
-        const y = smoothRef.current.y - variant.size;
-        cursor.style.transform = `translate(${x}px, ${y}px)`;
+      const activeVariant = CURSOR_VARIANTS[persona] || CURSOR_VARIANTS.gcc;
+
+      if (activeVariant.shape === "dualring") {
+        innerPos.current.x = lerp(innerPos.current.x, mousePos.current.x, activeVariant.innerLerp);
+        innerPos.current.y = lerp(innerPos.current.y, mousePos.current.y, activeVariant.innerLerp);
+
+        outerPos.current.x = lerp(outerPos.current.x, innerPos.current.x, activeVariant.outerLerp);
+        outerPos.current.y = lerp(outerPos.current.y, innerPos.current.y, activeVariant.outerLerp);
+
+        if (innerRef.current) {
+          innerRef.current.style.transform = `translate(${innerPos.current.x - activeVariant.innerSize / 2}px, ${innerPos.current.y - activeVariant.innerSize / 2}px)`;
+        }
+
+        if (outerRef.current) {
+          outerRef.current.style.transform = `translate(${outerPos.current.x - activeVariant.outerSize / 2}px, ${outerPos.current.y - activeVariant.outerSize / 2}px)`;
+        }
+      } else {
+        currentPos.current.x = lerp(currentPos.current.x, mousePos.current.x, 0.18);
+        currentPos.current.y = lerp(currentPos.current.y, mousePos.current.y, 0.18);
+
+        if (cursorRef.current) {
+          cursorRef.current.style.transform = `translate(${currentPos.current.x - activeVariant.size / 2}px, ${currentPos.current.y - activeVariant.size / 2}px)`;
+        }
       }
+
       rafRef.current = requestAnimationFrame(tick);
     };
 
@@ -55,7 +83,50 @@ export default function CustomCursor({ persona }) {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [variant]);
+  }, [persona]);
+
+  if (isDualRing) {
+    return (
+      <>
+        <div
+          ref={innerRef}
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: variant.innerSize,
+            height: variant.innerSize,
+            borderRadius: "50%",
+            backgroundColor: variant.color,
+            pointerEvents: "none",
+            zIndex: 99999,
+            willChange: "transform",
+            mixBlendMode: "difference",
+          }}
+        />
+        <div
+          ref={outerRef}
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: variant.outerSize,
+            height: variant.outerSize,
+            borderRadius: "50%",
+            border: `1.5px solid ${variant.color}`,
+            backgroundColor: "transparent",
+            opacity: 0.65,
+            pointerEvents: "none",
+            zIndex: 99998,
+            willChange: "transform",
+            mixBlendMode: "difference",
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <div

@@ -3,8 +3,8 @@ export const COMPILERS = [
     id: "segfault",
     displayName: "SegFault.ai",
     tagline: "The premier tool for writing morally reprehensible C++ code.",
-    accentColor: "#ff3b3b",
-    accentColorDim: "#3b0000",
+    accentColor: "#00ff88",
+    accentColorDim: "#001a0d",
     buttonLabel: "[ COMPILE ]",
     logoGlyph: "⚠",
     chaosMessages: [
@@ -25,8 +25,8 @@ export const COMPILERS = [
     statusBarText:
       "SegFault.ai v0.0.1-unstable  |  UB: Active  |  Memory: Leaking  |  Core: Dumped",
     outputHeaderLabel: "SEGFAULT REPORT",
-    outputTextColor: "#ff6b6b",
-    outputBg: "#110000",
+    outputTextColor: "#00ff88",
+    outputBg: "#050f05",
     endBadgeLabel: "CORE DUMPED",
     endBadgePulse: true,
     endBadgeTextColor: "#000000",
@@ -69,8 +69,8 @@ export const COMPILERS = [
     id: "syntaxterror",
     displayName: "SyntaxTerror",
     tagline: "It doesn't find bugs; it creates them.",
-    accentColor: "#00ff88",
-    accentColorDim: "#001a0d",
+    accentColor: "#ff1a75",
+    accentColorDim: "#2a0015",
     buttonLabel: "[ TERRORIZE ]",
     logoGlyph: "☠",
     chaosMessages: [
@@ -91,8 +91,8 @@ export const COMPILERS = [
     statusBarText:
       "SyntaxTerror v13  |  Bugs Created: [incrementing]  |  Bugs Fixed: 0  |  Chaos: MAX",
     outputHeaderLabel: "BUG REPORT (INSTALL LOG)",
-    outputTextColor: "#00ff88",
-    outputBg: "#050f05",
+    outputTextColor: "#ff1a75",
+    outputBg: "#12000a",
     endBadgeLabel: "TERRORISM COMPLETE",
     endBadgePulse: true,
     endBadgeTextColor: "#000000",

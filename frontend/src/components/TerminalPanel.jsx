@@ -6,10 +6,10 @@ import { motion } from "framer-motion";
 
 const COMPILER_THEMES = {
   segfault: {
-    foreground: "#ff6b6b",
-    cursor: "#ff3b3b",
+    foreground: "#00ff88",
+    cursor: "#00ff88",
     cursorAccent: "#000000",
-    selectionBackground: "#3b0000",
+    selectionBackground: "#001a0d",
   },
   gcc: {
     foreground: "#c4b5fd",
@@ -18,10 +18,10 @@ const COMPILER_THEMES = {
     selectionBackground: "#1a0a2e",
   },
   syntaxterror: {
-    foreground: "#00ff88",
-    cursor: "#00ff88",
+    foreground: "#ff1a75",
+    cursor: "#ff1a75",
     cursorAccent: "#000000",
-    selectionBackground: "#001a0d",
+    selectionBackground: "#2a0015",
   },
 };
 

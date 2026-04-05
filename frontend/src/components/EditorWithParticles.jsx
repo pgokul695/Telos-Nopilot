@@ -6,9 +6,15 @@ const FLEE_RADIUS = 150;
 const DAMPING = 0.88;
 
 const PERSONA_PALETTE = {
-  segfault: ["#ff4444", "#ff2222", "#cc2222", "#ff6655", "#dd3333"],
+  segfault: ["#00ff88", "#00ddaa", "#00ffcc", "#22ff66", "#00cc88"],
   gcc: ["#888888", "#aaaaaa", "#666666", "#999977", "#777788"],
-  syntaxterror: ["#00ff88", "#00ddaa", "#00ffcc", "#22ff66", "#00cc88"],
+  syntaxterror: ["#ff1a75", "#ff0066", "#ff4da6", "#ff3385", "#cc0052"],
+};
+
+const PERSONA_COLORS = {
+  segfault: { primary: "#00ff88", secondary: "#00ddaa" },
+  gcc: { primary: "#888888", secondary: "#aaaaaa" },
+  syntaxterror: { primary: "#ff1a75", secondary: "#ff4da6" },
 };
 
 const PERSONA_PHYSICS = {
@@ -91,6 +97,7 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
       context.clearRect(0, 0, width, height);
 
       const { x: mouseX, y: mouseY, inside } = mouseRef.current;
+      const colors = PERSONA_COLORS[persona] || PERSONA_COLORS.gcc;
       const physics = PERSONA_PHYSICS[persona] || {
         ...PERSONA_PHYSICS.gcc,
         damping: DAMPING,
@@ -125,7 +132,7 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
         context.save();
         context.translate(particle.x, particle.y);
         context.rotate(particle.angle);
-        context.fillStyle = particle.color;
+        context.fillStyle = particle.color || colors.primary;
         context.globalAlpha = particle.opacity;
         context.fillRect(-particle.w / 2, -particle.h / 2, particle.w, particle.h);
         context.restore();
