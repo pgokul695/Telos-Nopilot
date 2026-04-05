@@ -30,6 +30,7 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
   const mouseRef = useRef({ x: -9999, y: -9999, inside: false });
   const particlesRef = useRef([]);
   const rafRef = useRef(null);
+  const editorRef = useRef(null);
 
   const particleCount = isMobile ? 0 : isTablet ? 160 : 280;
 
@@ -43,6 +44,13 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
     renderLineHighlight: isMobile ? "none" : "line",
     scrollBeyondLastLine: false,
     wordWrap: isMobile ? "on" : monacoProps.options?.wordWrap || "off",
+  };
+
+  const handleEditorMount = (editor, monaco) => {
+    editorRef.current = editor;
+    if (typeof monacoProps.onMount === "function") {
+      monacoProps.onMount(editor, monaco);
+    }
   };
 
   if (isMobile) {
@@ -90,6 +98,14 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
 
     const resize = () => {
       const rect = container.getBoundingClientRect();
+      if (editorRef.current) {
+        editorRef.current.layout();
+      }
+
+      if (rect.width <= 0 || rect.height <= 0) {
+        return;
+      }
+
       canvas.width = rect.width;
       canvas.height = rect.height;
       initParticles(rect.width, rect.height);
@@ -192,7 +208,13 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
           zIndex: 10,
         }}
       />
-      <MonacoEditor {...monacoProps} options={editorOptions} height="100%" width="100%" />
+      <MonacoEditor
+        {...monacoProps}
+        onMount={handleEditorMount}
+        options={editorOptions}
+        height="100%"
+        width="100%"
+      />
     </div>
   );
 }

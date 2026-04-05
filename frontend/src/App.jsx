@@ -262,44 +262,41 @@ export default function App() {
               <div
                 className={rightTab === "terminal" ? "panel-tab-content panel-tab-content--active" : "panel-tab-content"}
               >
-                {rightTab === "terminal" && (
-                  <TerminalPanel
-                    result={result}
-                    isRunning={isRunning}
-                    statusMsg={statusMsg}
-                    selectedCompiler={selectedCompiler}
-                  />
-                )}
+                <TerminalPanel
+                  result={result}
+                  isRunning={isRunning}
+                  statusMsg={statusMsg}
+                  selectedCompiler={selectedCompiler}
+                />
               </div>
 
               <div
                 className={rightTab === "output" ? "panel-tab-content panel-tab-content--active" : "panel-tab-content"}
               >
-                {rightTab === "output" &&
-                  (effectivePhase === "chaos" ? (
-                    <ChaoticLoader selectedCompiler={selectedCompiler} phase={effectivePhase} />
-                  ) : (
-                    <>
-                      <OutputPanel
-                        output={error ? `${output}\n\n[stream error] ${error}` : output}
-                        phase={effectivePhase}
-                        selectedCompiler={selectedCompiler}
-                        isStreaming={isStreaming}
-                      />
+                {effectivePhase === "chaos" ? (
+                  <ChaoticLoader selectedCompiler={selectedCompiler} phase={effectivePhase} />
+                ) : (
+                  <>
+                    <OutputPanel
+                      output={error ? `${output}\n\n[stream error] ${error}` : output}
+                      phase={effectivePhase}
+                      selectedCompiler={selectedCompiler}
+                      isStreaming={isStreaming}
+                    />
 
-                      {effectivePhase === "idle" && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-0 flex items-center justify-center text-center text-sm"
-                          style={{ color: "#555" }}
-                        >
-                          Select a compiler and press {selectedCompiler.buttonLabel}
-                        </motion.div>
-                      )}
-                    </>
-                  ))}
+                    {effectivePhase === "idle" && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex items-center justify-center text-center text-sm"
+                        style={{ color: "#555" }}
+                      >
+                        Select a compiler and press {selectedCompiler.buttonLabel}
+                      </motion.div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </section>
