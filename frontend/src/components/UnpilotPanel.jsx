@@ -94,13 +94,23 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
 
     const viewport = window.visualViewport;
     const updateInset = () => {
-      const keyboardHeight = Math.max(0, window.innerHeight - viewport.height);
-      inputBarRef.current.style.paddingBottom = keyboardHeight > 50 ? `${keyboardHeight}px` : "8px";
+      if (!inputBarRef.current) {
+        return;
+      }
+      const keyboardHeight = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      inputBarRef.current.style.transform = keyboardHeight > 50 ? `translateY(-${keyboardHeight}px)` : "translateY(0)";
     };
 
     updateInset();
     viewport.addEventListener("resize", updateInset);
-    return () => viewport.removeEventListener("resize", updateInset);
+    viewport.addEventListener("scroll", updateInset);
+    return () => {
+      viewport.removeEventListener("resize", updateInset);
+      viewport.removeEventListener("scroll", updateInset);
+      if (inputBarRef.current) {
+        inputBarRef.current.style.transform = "translateY(0)";
+      }
+    };
   }, [isMobile]);
 
   const loadingMessage = useMemo(() => LOADING_MESSAGES[selectedCompiler.id] || "Generating...", [selectedCompiler.id]);
@@ -253,10 +263,10 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
   };
 
   return (
-    <div className="flex h-full flex-col" style={{ background: "#0a0a0a" }}>
+    <div className="unpilot-panel" style={{ background: "#0a0a0a" }}>
       <div
         ref={listRef}
-        className="flex-1 overflow-auto px-3 py-3"
+        className="unpilot-messages"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -347,7 +357,7 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
 
       <div
         ref={inputBarRef}
-        className="unpilot-input-bar border-t p-3"
+        className="unpilot-input-bar"
         style={{ borderColor: "#1e1e1e", background: "#0f0f0f" }}
       >
         <div className="flex items-end gap-2">
@@ -359,7 +369,7 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
             disabled={isStreaming}
             placeholder={placeholder}
             rows={1}
-            className="max-h-24 min-h-10 flex-1 resize-none rounded border px-2 py-2 text-xs outline-none"
+            className="max-h-24 min-h-10 flex-1 resize-none rounded border px-2 py-2 outline-none"
             style={{
               borderColor: "#2a2a2a",
               background: "#0a0a0a",

@@ -123,7 +123,6 @@ export default function App() {
   const tabs = ["unpilot", "terminal", "output"];
   const isStacked = isMobile || isTablet;
   const editorHeight = isMobile ? "45vh" : isTablet ? "55vh" : "auto";
-  const panelMinHeight = isMobile ? "40vh" : isTablet ? "35vh" : "0";
 
   const handlePanelTouchStart = (event) => {
     if (!isMobile) {
@@ -198,12 +197,11 @@ export default function App() {
           </div>
 
           <section
-            className="relative flex min-h-0 flex-col overflow-hidden"
+            className="right-pane relative flex min-h-0 flex-col overflow-hidden"
             style={
               isStacked
                 ? {
                     borderTop: "1px solid var(--border)",
-                    minHeight: panelMinHeight,
                     flex: 1,
                   }
                 : undefined
@@ -250,7 +248,9 @@ export default function App() {
               onTouchStart={handlePanelTouchStart}
               onTouchEnd={handlePanelTouchEnd}
             >
-              <div style={{ display: rightTab === "unpilot" ? "block" : "none", height: "100%" }}>
+              <div
+                className={rightTab === "unpilot" ? "panel-tab-content panel-tab-content--active" : "panel-tab-content"}
+              >
                 <UnpilotPanel
                   selectedCompiler={selectedCompiler}
                   selectedLanguage={selectedLanguage}
@@ -259,40 +259,48 @@ export default function App() {
                 />
               </div>
 
-              {rightTab === "terminal" && (
-                <TerminalPanel
-                  result={result}
-                  isRunning={isRunning}
-                  statusMsg={statusMsg}
-                  selectedCompiler={selectedCompiler}
-                />
-              )}
+              <div
+                className={rightTab === "terminal" ? "panel-tab-content panel-tab-content--active" : "panel-tab-content"}
+              >
+                {rightTab === "terminal" && (
+                  <TerminalPanel
+                    result={result}
+                    isRunning={isRunning}
+                    statusMsg={statusMsg}
+                    selectedCompiler={selectedCompiler}
+                  />
+                )}
+              </div>
 
-              {rightTab === "output" &&
-                (effectivePhase === "chaos" ? (
-                  <ChaoticLoader selectedCompiler={selectedCompiler} phase={effectivePhase} />
-                ) : (
-                  <>
-                    <OutputPanel
-                      output={error ? `${output}\n\n[stream error] ${error}` : output}
-                      phase={effectivePhase}
-                      selectedCompiler={selectedCompiler}
-                      isStreaming={isStreaming}
-                    />
+              <div
+                className={rightTab === "output" ? "panel-tab-content panel-tab-content--active" : "panel-tab-content"}
+              >
+                {rightTab === "output" &&
+                  (effectivePhase === "chaos" ? (
+                    <ChaoticLoader selectedCompiler={selectedCompiler} phase={effectivePhase} />
+                  ) : (
+                    <>
+                      <OutputPanel
+                        output={error ? `${output}\n\n[stream error] ${error}` : output}
+                        phase={effectivePhase}
+                        selectedCompiler={selectedCompiler}
+                        isStreaming={isStreaming}
+                      />
 
-                    {effectivePhase === "idle" && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 flex items-center justify-center text-center text-sm"
-                        style={{ color: "#555" }}
-                      >
-                        Select a compiler and press {selectedCompiler.buttonLabel}
-                      </motion.div>
-                    )}
-                  </>
-                ))}
+                      {effectivePhase === "idle" && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="absolute inset-0 flex items-center justify-center text-center text-sm"
+                          style={{ color: "#555" }}
+                        >
+                          Select a compiler and press {selectedCompiler.buttonLabel}
+                        </motion.div>
+                      )}
+                    </>
+                  ))}
+              </div>
             </div>
           </section>
         </main>
