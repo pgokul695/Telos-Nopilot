@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
-export default function CompilerSelect({ compilers, selected, onChange, phase }) {
+export default function CompilerSelect({ compilers, selected, onChange, phase, fullWidth = false, compact = false }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const isDisabled = phase === "chaos";
@@ -24,18 +24,20 @@ export default function CompilerSelect({ compilers, selected, onChange, phase })
   }, []);
 
   return (
-    <div className="relative w-[420px] max-w-full" ref={wrapRef}>
+    <div className={`relative max-w-full ${fullWidth ? "w-full" : "w-[420px]"}`} ref={wrapRef}>
       <button
         type="button"
         disabled={isDisabled}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between rounded-full border px-4 py-2 text-left text-sm transition-all"
+        className={`flex w-full items-center justify-between border text-left transition-all ${fullWidth ? "rounded-md" : "rounded-full"}`}
         style={{
           borderColor: "var(--accent)",
           color: "var(--accent)",
           opacity: isDisabled ? 0.45 : 1,
           boxShadow: "0 0 8px color-mix(in srgb, var(--accent) 30%, transparent)",
           background: "rgba(8,8,8,0.95)",
+          padding: compact ? "6px 12px" : "8px 16px",
+          fontSize: compact ? 12 : 14,
         }}
       >
         <span className="truncate">

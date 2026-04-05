@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import MonacoEditor from "@monaco-editor/react";
+import { useBreakpoint } from "../hooks/useBreakpoint";
 
-const PARTICLE_COUNT = 280;
 const FLEE_RADIUS = 150;
 const DAMPING = 0.88;
 
@@ -24,15 +24,38 @@ const PERSONA_PHYSICS = {
 };
 
 export default function EditorWithParticles({ persona, ...monacoProps }) {
+  const { isMobile, isTablet } = useBreakpoint();
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: -9999, y: -9999, inside: false });
   const particlesRef = useRef([]);
   const rafRef = useRef(null);
 
+  const particleCount = isMobile ? 0 : isTablet ? 160 : 280;
+
+  const editorOptions = {
+    ...monacoProps.options,
+    fontSize: isMobile ? 12 : isTablet ? 13 : 14,
+    lineNumbers: isMobile ? "off" : "on",
+    minimap: { enabled: !isMobile && !isTablet && monacoProps.options?.minimap?.enabled !== false },
+    folding: !isMobile,
+    lineDecorationsWidth: isMobile ? 0 : 10,
+    renderLineHighlight: isMobile ? "none" : "line",
+    scrollBeyondLastLine: false,
+    wordWrap: isMobile ? "on" : monacoProps.options?.wordWrap || "off",
+  };
+
+  if (isMobile) {
+    return (
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <MonacoEditor {...monacoProps} options={editorOptions} height="100%" width="100%" />
+      </div>
+    );
+  }
+
   const initParticles = (width, height) => {
     const palette = PERSONA_PALETTE[persona] || PERSONA_PALETTE.gcc;
-    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => {
+    particlesRef.current = Array.from({ length: particleCount }, () => {
       const x = Math.random() * width;
       const y = Math.random() * height;
       return {
@@ -152,7 +175,7 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
       container.removeEventListener("mousemove", onMouseMove);
       container.removeEventListener("mouseleave", onMouseLeave);
     };
-  }, [persona]);
+  }, [particleCount, persona]);
 
   return (
     <div ref={containerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -169,7 +192,7 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
           zIndex: 10,
         }}
       />
-      <MonacoEditor {...monacoProps} />
+      <MonacoEditor {...monacoProps} options={editorOptions} height="100%" width="100%" />
     </div>
   );
 }

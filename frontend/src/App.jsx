@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ChaoticLoader from "./components/ChaoticLoader";
 import CustomCursor from "./components/CustomCursor";
 import Editor from "./components/Editor";
@@ -10,6 +10,7 @@ import Toolbar from "./components/Toolbar";
 import UnpilotPanel from "./components/UnpilotPanel";
 import { COMPILERS } from "./constants/compilers";
 import { DEFAULT_LANGUAGE } from "./constants/languages";
+import { useBreakpoint } from "./hooks/useBreakpoint";
 import { useExecutor } from "./hooks/useExecutor";
 import { usePrankSequence } from "./hooks/usePrankSequence";
 import { useStream } from "./hooks/useStream";
@@ -19,12 +20,14 @@ function randomInt(min, max) {
 }
 
 export default function App() {
+  const { isMobile, isTablet, isTouchDevice } = useBreakpoint();
   const [phase, setPhase] = useState("idle");
   const [code, setCode] = useState(DEFAULT_LANGUAGE.defaultCode);
   const [selectedCompiler, setSelectedCompiler] = useState(COMPILERS[0]);
   const [selectedLanguage, setSelectedLanguage] = useState(DEFAULT_LANGUAGE);
   const [rightTab, setRightTab] = useState("unpilot");
   const [tokenCount, setTokenCount] = useState(0);
+  const touchStartXRef = useRef(null);
 
   const { run, isRunning, result, statusMsg } = useExecutor();
   const { isChaos, startChaos } = usePrankSequence();
@@ -117,14 +120,46 @@ export default function App() {
     return () => window.removeEventListener("keydown", handler);
   }, [handleRun]);
 
+  const tabs = ["unpilot", "terminal", "output"];
+  const isStacked = isMobile || isTablet;
+  const editorHeight = isMobile ? "45vh" : isTablet ? "55vh" : "auto";
+  const panelMinHeight = isMobile ? "40vh" : isTablet ? "35vh" : "0";
+
+  const handlePanelTouchStart = (event) => {
+    if (!isMobile) {
+      return;
+    }
+    touchStartXRef.current = event.touches[0]?.clientX ?? null;
+  };
+
+  const handlePanelTouchEnd = (event) => {
+    if (!isMobile || touchStartXRef.current == null) {
+      return;
+    }
+
+    const endX = event.changedTouches[0]?.clientX;
+    if (typeof endX !== "number") {
+      touchStartXRef.current = null;
+      return;
+    }
+
+    const delta = endX - touchStartXRef.current;
+    if (Math.abs(delta) > 50) {
+      const currentIndex = tabs.indexOf(rightTab);
+      const direction = delta < 0 ? 1 : -1;
+      const nextIndex = Math.max(0, Math.min(tabs.length - 1, currentIndex + direction));
+      setRightTab(tabs[nextIndex]);
+    }
+    touchStartXRef.current = null;
+  };
+
   return (
     <div className="h-screen w-screen overflow-hidden bg-bg-primary text-[var(--text-primary)]">
-      <CustomCursor persona={selectedCompiler.id} />
+      {!isTouchDevice && <CustomCursor persona={selectedCompiler.id} />}
 
       <div
-        className="grid h-full"
+        className="flex h-full flex-col"
         style={{
-          gridTemplateRows: "52px 1fr 28px",
           transition:
             "color 600ms ease, border-color 600ms ease, background-color 600ms ease, box-shadow 600ms ease",
         }}
@@ -144,44 +179,64 @@ export default function App() {
           isRoastBusy={effectivePhase === "chaos" || isStreaming}
         />
 
-        <main className="grid min-h-0" style={{ gridTemplateColumns: "58% 42%" }}>
-          <Editor
-            code={code}
-            setCode={setCode}
-            selectedLanguage={selectedLanguage}
-            phase={effectivePhase}
-            persona={selectedCompiler.id}
-          />
+        <main
+          className="min-h-0 flex-1"
+          style={
+            isStacked
+              ? { display: "flex", flexDirection: "column", overflow: "hidden" }
+              : { display: "grid", gridTemplateColumns: "58% 42%", overflow: "hidden" }
+          }
+        >
+          <div style={isStacked ? { height: editorHeight, flexShrink: 0, minHeight: 0 } : { minHeight: 0 }}>
+            <Editor
+              code={code}
+              setCode={setCode}
+              selectedLanguage={selectedLanguage}
+              phase={effectivePhase}
+              persona={selectedCompiler.id}
+            />
+          </div>
 
-          <section className="relative flex min-h-0 flex-col overflow-hidden">
+          <section
+            className="relative flex min-h-0 flex-col overflow-hidden"
+            style={
+              isStacked
+                ? {
+                    borderTop: "1px solid var(--border)",
+                    minHeight: panelMinHeight,
+                    flex: 1,
+                  }
+                : undefined
+            }
+          >
             <div
+              className="panel-tabs"
               style={{
-                display: "flex",
                 borderBottom: "1px solid #1e1e1e",
                 background: "#0f0f0f",
                 flexShrink: 0,
               }}
             >
-              {["unpilot", "terminal", "output"].map((tab) => (
+              {tabs.map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setRightTab(tab)}
+                  className="panel-tab"
                   style={{
                     fontFamily: "JetBrains Mono, monospace",
-                    fontSize: 11,
-                    padding: "8px 16px",
                     background: "none",
                     border: "none",
                     borderBottom: rightTab === tab ? "2px solid var(--accent)" : "2px solid transparent",
                     color: rightTab === tab ? "var(--accent)" : "#444",
-                    cursor: "pointer",
                     letterSpacing: "0.05em",
                     textTransform: "uppercase",
                   }}
                 >
                   {tab === "unpilot"
-                    ? `UNPILOT ★ · ${selectedCompiler.displayName}`
+                    ? isMobile
+                      ? "UNPILOT ★"
+                      : `UNPILOT ★ · ${selectedCompiler.displayName}`
                     : tab === "terminal" && isRunning
                       ? `● ${tab}`
                       : tab}
@@ -189,7 +244,12 @@ export default function App() {
               ))}
             </div>
 
-            <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+            <div
+              className="panel-content"
+              style={{ flex: 1, overflow: "hidden", position: "relative", padding: 0 }}
+              onTouchStart={handlePanelTouchStart}
+              onTouchEnd={handlePanelTouchEnd}
+            >
               <div style={{ display: rightTab === "unpilot" ? "block" : "none", height: "100%" }}>
                 <UnpilotPanel
                   selectedCompiler={selectedCompiler}
@@ -241,28 +301,19 @@ export default function App() {
           initial={{ opacity: 0, y: 2 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 2 }}
-          className="flex items-center border-t px-3"
-          style={{ borderColor: "var(--border)", color: "#666" }}
+          className="flex items-center border-t px-3 text-[11px] italic"
+          style={{ borderColor: "var(--border)", color: "#666", minHeight: 24 }}
         >
-          <motion.div
-            key={selectedCompiler.id}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.22 }}
-            className="text-[11px] italic"
-          >
-            {selectedCompiler.tagline}
-          </motion.div>
+          {selectedCompiler.tagline}
         </motion.div>
-      </div>
 
-      <StatusBar
-        selectedCompiler={selectedCompiler}
-        selectedLanguage={selectedLanguage}
-        phase={effectivePhase}
-        tokenCount={tokenCount}
-      />
+        <StatusBar
+          selectedCompiler={selectedCompiler}
+          selectedLanguage={selectedLanguage}
+          phase={effectivePhase}
+          tokenCount={tokenCount}
+        />
+      </div>
     </div>
   );
 }

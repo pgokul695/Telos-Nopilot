@@ -51,7 +51,7 @@ export default function StatusBar({ selectedCompiler, selectedLanguage, phase, t
 
   return (
     <footer
-      className="fixed bottom-0 left-0 right-0 z-50 flex h-[26px] items-center justify-between border-t px-3 text-[11px]"
+      className="status-bar"
       style={{
         borderColor: "var(--border)",
         background: flash ? "var(--accent-dim)" : "#0a0a0a",
@@ -59,20 +59,30 @@ export default function StatusBar({ selectedCompiler, selectedLanguage, phase, t
         transition: "background 180ms",
       }}
     >
-      <span className="truncate">
-        {selectedLanguage.label} · {engineLabel}  |  {statusText}
+      <span>
+        <span className="status-item">{selectedLanguage.label}</span>
+        <span className="status-item status-item--secondary"> · {engineLabel}</span>
+        <span className="status-item"> | {statusText.split("|")[0].trim()}</span>
+        {statusText
+          .split("|")
+          .slice(1)
+          .map((segment, index) => (
+            <span key={`${segment}-${index}`} className="status-item status-item--secondary">
+              {` | ${segment.trim()}`}
+            </span>
+          ))}
       </span>
-      <span className="flex items-center gap-2">
-        <span style={{ color: "#5e5e5e", marginRight: 8 }}>ctrl+enter run  ·  tab complete</span>
-        <span title="does nothing" style={{ color: "#ff3b3b" }}>
+      <span className="status-item status-item--secondary" style={{ color: "#5e5e5e" }}>
+        ctrl+enter run  ·  tab complete
+      </span>
+      <span className="status-item status-item--secondary" title="does nothing" style={{ color: "#ff3b3b" }}>
           ●
-        </span>
-        <span title="also does nothing" style={{ color: "#ffb800" }}>
+      </span>
+      <span className="status-item status-item--secondary" title="also does nothing" style={{ color: "#ffb800" }}>
           ●
-        </span>
-        <span title="you thought this would do something" style={{ color: "#00ff88" }}>
+      </span>
+      <span className="status-item" title="you thought this would do something" style={{ color: "#00ff88" }}>
           ●
-        </span>
       </span>
     </footer>
   );

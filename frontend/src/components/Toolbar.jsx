@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { LANGUAGES } from "../constants/languages";
+import { useBreakpoint } from "../hooks/useBreakpoint";
 import CompilerSelect from "./CompilerSelect";
 import GlitchText from "./GlitchText";
 import RunButton from "./RunButton";
@@ -18,6 +19,7 @@ export default function Toolbar({
   isRoastBusy,
 }) {
   const [buttonText, setButtonText] = useState(selectedCompiler.buttonLabel);
+  const { isMobile, isTablet } = useBreakpoint();
 
   useEffect(() => {
     if (phase !== "chaos") {
@@ -36,6 +38,135 @@ export default function Toolbar({
 
     return () => clearInterval(id);
   }, [phase, selectedCompiler]);
+
+  const languagePills = (compact = false, scrollable = false) => (
+    <div
+      className={scrollable ? "flex items-center gap-2 overflow-x-auto" : "flex items-center gap-2"}
+      style={{
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
+    >
+      {LANGUAGES.map((lang) => (
+        <button
+          key={lang.id}
+          type="button"
+          onClick={() => onLanguageChange(lang)}
+          style={{
+            fontFamily: "JetBrains Mono, monospace",
+            fontSize: compact ? 10 : 11,
+            padding: compact ? "4px 8px" : "4px 10px",
+            borderRadius: 20,
+            border: `1px solid ${selectedLanguage.id === lang.id ? "var(--accent)" : "#2a2a2a"}`,
+            background: selectedLanguage.id === lang.id ? "var(--accent)" : "transparent",
+            color: selectedLanguage.id === lang.id ? "#000" : "#555",
+            cursor: "pointer",
+            transition: "all 150ms",
+            letterSpacing: "0.03em",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {compact ? (lang.id === "javascript" ? "JS" : lang.id === "python" ? "PY" : "C++") : lang.label}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <header
+          className="relative flex h-[44px] items-center justify-between px-3"
+          style={{
+            borderBottom: "1px solid var(--border)",
+            boxShadow: `0 1px 0 color-mix(in srgb, var(--accent) ${phase === "chaos" ? "100%" : "20%"}, transparent)`,
+          }}
+        >
+          <div className="min-w-0">
+            <div className="text-base font-bold leading-none" style={{ color: "var(--accent)" }}>
+              Nopilot
+            </div>
+            <div className="text-[9px] uppercase tracking-[0.16em] text-neutral-500">not your copilot</div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <RunButton onClick={onRun} isRunning={isRunning} disabled={phase === "chaos"} />
+            <button
+              type="button"
+              onClick={onAnalyze}
+              disabled={isRoastBusy}
+              className="h-[32px] w-[32px] rounded border text-sm"
+              style={{
+                border: "1px solid var(--accent)",
+                color: "var(--accent)",
+                background: "transparent",
+                opacity: isRoastBusy ? 0.45 : 1,
+              }}
+              title={buttonText}
+            >
+              ⚙
+            </button>
+          </div>
+        </header>
+
+        <div className="mobile-toolbar">
+          {languagePills(true, true)}
+          <CompilerSelect
+            compilers={compilers}
+            selected={selectedCompiler}
+            onChange={onCompilerChange}
+            phase={phase}
+            fullWidth
+            compact
+          />
+        </div>
+      </>
+    );
+  }
+
+  if (isTablet) {
+    return (
+      <header
+        className="relative flex h-[48px] items-center justify-between gap-2 px-3"
+        style={{
+          borderBottom: "1px solid var(--border)",
+          boxShadow: `0 1px 0 color-mix(in srgb, var(--accent) ${phase === "chaos" ? "100%" : "20%"}, transparent)`,
+        }}
+      >
+        <div className="min-w-0 text-base font-bold leading-none" style={{ color: "var(--accent)" }}>
+          Nopilot
+        </div>
+
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+          {languagePills(true, true)}
+          <RunButton onClick={onRun} isRunning={isRunning} disabled={phase === "chaos"} />
+          <CompilerSelect
+            compilers={compilers}
+            selected={selectedCompiler}
+            onChange={onCompilerChange}
+            phase={phase}
+            compact
+          />
+          <button
+            type="button"
+            onClick={onAnalyze}
+            disabled={isRoastBusy}
+            className="h-[32px] w-[32px] rounded border text-sm"
+            style={{
+              border: "1px solid var(--accent)",
+              color: "var(--accent)",
+              background: "transparent",
+              opacity: isRoastBusy ? 0.45 : 1,
+            }}
+            title={buttonText}
+          >
+            ⚙
+          </button>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header
@@ -57,27 +188,7 @@ export default function Toolbar({
 
       <div className="flex items-center gap-3 px-2">
         <div className="flex items-center gap-2">
-          {LANGUAGES.map((lang) => (
-            <button
-              key={lang.id}
-              type="button"
-              onClick={() => onLanguageChange(lang)}
-              style={{
-                fontFamily: "JetBrains Mono, monospace",
-                fontSize: 10,
-                padding: "4px 10px",
-                borderRadius: 20,
-                border: `1px solid ${selectedLanguage.id === lang.id ? "var(--accent)" : "#2a2a2a"}`,
-                background: selectedLanguage.id === lang.id ? "var(--accent)" : "transparent",
-                color: selectedLanguage.id === lang.id ? "#000" : "#555",
-                cursor: "pointer",
-                transition: "all 150ms",
-                letterSpacing: "0.03em",
-              }}
-            >
-              {lang.label}
-            </button>
-          ))}
+          {languagePills()}
           <RunButton onClick={onRun} isRunning={isRunning} disabled={phase === "chaos"} />
         </div>
 

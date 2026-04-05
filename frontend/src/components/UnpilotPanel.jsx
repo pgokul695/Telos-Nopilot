@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useBreakpoint } from "../hooks/useBreakpoint";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
@@ -53,6 +54,7 @@ const LOADING_MESSAGES = {
 };
 
 export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeContext, onInsertCode }) {
+  const { isMobile } = useBreakpoint();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -61,6 +63,9 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
   const [placeholder, setPlaceholder] = useState(PLACEHOLDERS[selectedCompiler.id]);
   const listRef = useRef(null);
   const textareaRef = useRef(null);
+  const inputBarRef = useRef(null);
+  const longPressTimerRef = useRef(null);
+  const longPressTriggeredRef = useRef(false);
 
   useEffect(() => {
     setPlaceholder(PLACEHOLDERS[selectedCompiler.id] || "Describe what code you want...");
@@ -81,6 +86,22 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
     const nextHeight = Math.min(textareaRef.current.scrollHeight, 96);
     textareaRef.current.style.height = `${Math.max(nextHeight, 40)}px`;
   }, [input]);
+
+  useEffect(() => {
+    if (!isMobile || typeof window === "undefined" || !window.visualViewport || !inputBarRef.current) {
+      return;
+    }
+
+    const viewport = window.visualViewport;
+    const updateInset = () => {
+      const keyboardHeight = Math.max(0, window.innerHeight - viewport.height);
+      inputBarRef.current.style.paddingBottom = keyboardHeight > 50 ? `${keyboardHeight}px` : "8px";
+    };
+
+    updateInset();
+    viewport.addEventListener("resize", updateInset);
+    return () => viewport.removeEventListener("resize", updateInset);
+  }, [isMobile]);
 
   const loadingMessage = useMemo(() => LOADING_MESSAGES[selectedCompiler.id] || "Generating...", [selectedCompiler.id]);
 
@@ -200,6 +221,37 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
     }
   };
 
+  const handleCodeTouchStart = (codeContent) => {
+    if (!isMobile) {
+      return;
+    }
+
+    longPressTriggeredRef.current = false;
+    longPressTimerRef.current = setTimeout(async () => {
+      longPressTriggeredRef.current = true;
+      try {
+        await navigator.clipboard.writeText(codeContent);
+      } catch {
+        // Ignore clipboard errors in unsupported environments.
+      }
+    }, 600);
+  };
+
+  const handleCodeTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handleCodeTap = (codeContent) => {
+    if (!isMobile || longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false;
+      return;
+    }
+    onInsertCode(codeContent);
+  };
+
   return (
     <div className="flex h-full flex-col" style={{ background: "#0a0a0a" }}>
       <div
@@ -249,6 +301,10 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
                     key={`${msg.id}-code-${index}`}
                     className="mt-2 overflow-hidden rounded border"
                     style={{ borderColor: "#1e1e1e" }}
+                    onClick={() => handleCodeTap(block.code)}
+                    onTouchStart={() => handleCodeTouchStart(block.code)}
+                    onTouchEnd={handleCodeTouchEnd}
+                    onTouchCancel={handleCodeTouchEnd}
                   >
                     <pre
                       className="max-h-[260px] overflow-auto p-3 text-[12px]"
@@ -289,7 +345,11 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
         )}
       </div>
 
-      <div className="border-t p-3" style={{ borderColor: "#1e1e1e", background: "#0f0f0f" }}>
+      <div
+        ref={inputBarRef}
+        className="unpilot-input-bar border-t p-3"
+        style={{ borderColor: "#1e1e1e", background: "#0f0f0f" }}
+      >
         <div className="flex items-end gap-2">
           <textarea
             ref={textareaRef}
@@ -304,6 +364,7 @@ export default function UnpilotPanel({ selectedCompiler, selectedLanguage, codeC
               borderColor: "#2a2a2a",
               background: "#0a0a0a",
               color: "#e8e8e8",
+              fontSize: isMobile ? 16 : 12,
             }}
           />
           <button
