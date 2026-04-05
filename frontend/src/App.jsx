@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ChaoticLoader from "./components/ChaoticLoader";
 import CustomCursor from "./components/CustomCursor";
 import Editor from "./components/Editor";
+import HexBackground from "./components/HexBackground";
 import OutputPanel from "./components/OutputPanel";
 import StatusBar from "./components/StatusBar";
 import TerminalPanel from "./components/TerminalPanel";
@@ -11,6 +12,7 @@ import UnpilotPanel from "./components/UnpilotPanel";
 import { COMPILERS } from "./constants/compilers";
 import { DEFAULT_LANGUAGE } from "./constants/languages";
 import { useBreakpoint } from "./hooks/useBreakpoint";
+import { useIsTouchPrimary } from "./utils/inputDevice";
 import { useExecutor } from "./hooks/useExecutor";
 import { usePrankSequence } from "./hooks/usePrankSequence";
 import { useStream } from "./hooks/useStream";
@@ -20,7 +22,8 @@ function randomInt(min, max) {
 }
 
 export default function App() {
-  const { isMobile, isTablet, isTouchDevice } = useBreakpoint();
+  const { isMobile, isTablet } = useBreakpoint();
+  const isTouchPrimary = useIsTouchPrimary();
   const [phase, setPhase] = useState("idle");
   const [code, setCode] = useState(DEFAULT_LANGUAGE.defaultCode);
   const [selectedCompiler, setSelectedCompiler] = useState(COMPILERS[0]);
@@ -154,10 +157,11 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-bg-primary text-[var(--text-primary)]">
-      {!isTouchDevice && <CustomCursor persona={selectedCompiler.id} />}
+      <HexBackground persona={selectedCompiler.id} />
+      {!isTouchPrimary && <CustomCursor persona={selectedCompiler.id} />}
 
       <div
-        className="flex h-full flex-col"
+        className="relative z-[1] flex h-full flex-col"
         style={{
           transition:
             "color 600ms ease, border-color 600ms ease, background-color 600ms ease, box-shadow 600ms ease",

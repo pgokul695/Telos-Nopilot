@@ -162,6 +162,14 @@ select {
   -webkit-overflow-scrolling: touch;
 }
 
+.hex-background svg {
+  animation: hex-breathe 8s ease-in-out infinite;
+}
+
+.hex-background-polygon {
+  transition: stroke 0.6s ease, stroke-opacity 0.6s ease;
+}
+
 @media (max-width: 1024px) {
   .mobile-toolbar {
     display: flex;
@@ -210,5 +218,15 @@ select {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes hex-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
   }
 }

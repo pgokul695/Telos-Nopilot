@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import MonacoEditor from "@monaco-editor/react";
 import { useBreakpoint } from "../hooks/useBreakpoint";
+import { useIsTouchPrimary } from "../utils/inputDevice";
 
 const FLEE_RADIUS = 150;
 const DAMPING = 0.88;
@@ -25,6 +26,7 @@ const PERSONA_PHYSICS = {
 
 export default function EditorWithParticles({ persona, ...monacoProps }) {
   const { isMobile, isTablet } = useBreakpoint();
+  const isTouchPrimary = useIsTouchPrimary();
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: -9999, y: -9999, inside: false });
@@ -32,7 +34,7 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
   const rafRef = useRef(null);
   const editorRef = useRef(null);
 
-  const particleCount = isMobile ? 0 : isTablet ? 160 : 280;
+  const particleCount = isTouchPrimary ? 0 : isTablet ? 160 : 280;
 
   const editorOptions = {
     ...monacoProps.options,
@@ -53,7 +55,7 @@ export default function EditorWithParticles({ persona, ...monacoProps }) {
     }
   };
 
-  if (isMobile) {
+  if (isTouchPrimary) {
     return (
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
         <MonacoEditor {...monacoProps} options={editorOptions} height="100%" width="100%" />
