@@ -76,11 +76,14 @@ CRITICAL FORMATTING RULES - these override everything else:
 - Use {COMMENT} for ALL comments. Never use // in Python. Never use # in C++ or JS.
 - Output raw code only. No markdown fences (no ```). No prose before or after the code.
 
-Open with this line (as a comment using {COMMENT}):
-segfault.ai: fatal error: generating this against the heap's explicit wishes
+The first line of your output must be exactly:
+{OPEN_LINE}
 
-Close with this line (as a comment using {COMMENT}):
-Segmentation fault (core dumped) - just kidding. It ran. This time.""",
+The last line of your output must be exactly:
+{CLOSE_LINE}
+
+These are already formatted as comments. Output them verbatim. Do not add any text before the
+first line or after the last line.""",
         "gcc": """You are generating {LANGUAGE} code.
 Runtime constraint: {RUNTIME_CONTEXT}
 Comment syntax for this language: {COMMENT}
@@ -106,11 +109,14 @@ CRITICAL FORMATTING RULES - these override everything else:
 - Use {COMMENT} for ALL comments. Never use // in Python. Never use # in C++ or JS.
 - Output raw code only. No markdown fences (no ```). No prose before or after the code.
 
-Open with this line (as a comment using {COMMENT}):
-We noticed you needed help with this. That tracks.
+The first line of your output must be exactly:
+{OPEN_LINE}
 
-Close with this line (as a comment using {COMMENT}):
-We believe in you. We just don't believe in this.""",
+The last line of your output must be exactly:
+{CLOSE_LINE}
+
+These are already formatted as comments. Output them verbatim. Do not add any text before the
+first line or after the last line.""",
         "syntaxterror": """You are generating {LANGUAGE} code.
 Runtime constraint: {RUNTIME_CONTEXT}
 Comment syntax for this language: {COMMENT}
@@ -134,11 +140,14 @@ CRITICAL FORMATTING RULES - these override everything else:
 - Use {COMMENT} for ALL comments. Never use // in Python. Never use # in C++ or JS.
 - Output raw code only. No markdown fences (no ```). No prose before or after the code.
 
-Open with this line (as a comment using {COMMENT}):
-SyntaxTerror Code Generation - deploying functionality against all odds
+The first line of your output must be exactly:
+{OPEN_LINE}
 
-Close with this line (as a comment using {COMMENT}):
-VERDICT: Ship it.""",
+The last line of your output must be exactly:
+{CLOSE_LINE}
+
+These are already formatted as comments. Output them verbatim. Do not add any text before the
+first line or after the last line.""",
 }
 
 RUNTIME_CONTEXTS = {
@@ -151,6 +160,18 @@ COMMENT_SYNTAX = {
     "javascript": "//",
     "python": "#",
     "cpp": "//",
+}
+
+PERSONA_OPEN = {
+    "segfault": "segfault.ai: fatal error: generating this against the heap's explicit wishes",
+    "gcc": "We noticed you needed help with this. That tracks.",
+    "syntaxterror": "SyntaxTerror Code Generation - deploying functionality against all odds",
+}
+
+PERSONA_CLOSE = {
+    "segfault": "Segmentation fault (core dumped) - just kidding. It ran. This time.",
+    "gcc": "We believe in you. We just don't believe in this.",
+    "syntaxterror": "VERDICT: Ship it.",
 }
 
 
@@ -220,9 +241,15 @@ async def stream_generation_response(request: GenerateCodeRequest):
     language = request.language if request.language in RUNTIME_CONTEXTS else "javascript"
 
     system_prompt = SYSTEM_PROMPTS_GEN[compiler_id]
+    comment = COMMENT_SYNTAX[language]
+    open_line = f"{comment} {PERSONA_OPEN[compiler_id]}"
+    close_line = f"{comment} {PERSONA_CLOSE[compiler_id]}"
+
     system_prompt = system_prompt.replace("{LANGUAGE}", language)
     system_prompt = system_prompt.replace("{RUNTIME_CONTEXT}", RUNTIME_CONTEXTS[language])
-    system_prompt = system_prompt.replace("{COMMENT}", COMMENT_SYNTAX[language])
+    system_prompt = system_prompt.replace("{COMMENT}", comment)
+    system_prompt = system_prompt.replace("{OPEN_LINE}", open_line)
+    system_prompt = system_prompt.replace("{CLOSE_LINE}", close_line)
 
     full_prompt = (
         f"{system_prompt}\n\n"
