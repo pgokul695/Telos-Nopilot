@@ -4,7 +4,7 @@
 
 Nopilot is a satirical AI code editor that runs real code, roasts your code, and generates runnable cursed code with personality-heavy commentary.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-111111?style=for-the-badge)](https://example.com)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-111111?style=for-the-badge)](https://telos.gokulp.online/)
 [![MIT License](https://img.shields.io/badge/License-MIT-00ff88?style=for-the-badge)](../LICENSE)
 [![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-f97316?style=for-the-badge)](https://www.anthropic.com)
 
@@ -27,8 +27,9 @@ This is not a productivity assistant, not a real compiler copilot, and not an en
 
 <!-- Add screenshots here -->
 
-Include at least one screenshot each for SegFault.ai, GCC, and SyntaxTerror.
-
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](<WhatsApp Image 2026-04-06 at 8.39.10 PM.jpeg>)
 ## Features
 
 ### 4.1 Three Compiler Personas

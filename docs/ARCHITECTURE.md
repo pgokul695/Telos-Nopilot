@@ -11,47 +11,62 @@ In short: frontend is the product, backend is a thin transport and key boundary.
 
 ## High-Level System
 
-```text
-Browser Frontend
-  - React app
-  - Monaco editor
-  - Execution engines (Web Worker, Pyodide, Wandbox)
-  - Persona UI + effects + custom cursor
-  - UNPILOT chat + insert flow
-          |
-          | POST + SSE
-          v
-FastAPI Backend (main.py)
-  - Prompt selection by compiler_id
-  - Model call with streaming
-  - SSE forwarding + [DONE]
+```mermaid
+graph TD
+    FE["Browser Frontend
+    - React app
+    - Monaco editor
+    - Execution engines (Web Worker, Pyodide, Wandbox)
+    - Persona UI + effects + custom cursor
+    - UNPILOT chat + insert flow"]
+
+    BE["FastAPI Backend (main.py)
+    - Prompt selection by compiler_id
+    - Model call with streaming
+    - SSE forwarding + [DONE]"]
+
+    FE -- "POST + SSE" --> BE
 ```
 
 ## Request Flow: Roast Mode
 
-```text
-User clicks [ COMPILE ]
-  -> Frontend sends { code, compiler_id } to POST /generate
-  -> Backend selects persona system prompt
-  -> Backend calls Claude API with streaming enabled
-  -> Backend forwards chunks as SSE data events
-  -> Frontend renders chunks in output panel
-  -> Backend emits [DONE]
-  -> Frontend unlocks controls
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant AI as Claude API
+
+    U->>FE: Clicks [ COMPILE ]
+    FE->>BE: POST /generate { code, compiler_id }
+    BE->>BE: Selects persona system prompt
+    BE->>AI: Call with streaming enabled
+    AI-->>BE: Stream chunks
+    BE-->>FE: Forward chunks as SSE data events
+    FE->>FE: Render chunks in output panel
+    BE-->>FE: Emit [DONE]
+    FE->>FE: Unlock controls
 ```
 
 ## Request Flow: UNPILOT Generation
 
-```text
-User sends message in UNPILOT
-  -> Frontend sends { user_prompt, code_context, compiler_id, language }
-     to POST /generate (or /generate-code)
-  -> Backend selects persona generation prompt variant
-  -> Backend injects LANGUAGE, RUNTIME_CONTEXT, OPEN_LINE, CLOSE_LINE
-  -> Backend streams SSE chunks
-  -> Frontend appends token stream to assistant message
-  -> End marker received
-  -> INSERT INTO EDITOR action appears on generated blocks
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant AI as Claude API
+
+    U->>FE: Sends message in UNPILOT
+    FE->>BE: POST /generate (or /generate-code)<br/>{ user_prompt, code_context, compiler_id, language }
+    BE->>BE: Selects persona generation prompt variant
+    BE->>BE: Injects LANGUAGE, RUNTIME_CONTEXT, OPEN_LINE, CLOSE_LINE
+    BE->>AI: Stream request
+    AI-->>BE: SSE chunks
+    BE-->>FE: Stream SSE chunks
+    FE->>FE: Append token stream to assistant message
+    BE-->>FE: End marker received
+    FE->>FE: INSERT INTO EDITOR action appears on generated blocks
 ```
 
 ## Frontend Component Map
