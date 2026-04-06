@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -52,11 +52,16 @@ function escapeXterm(str) {
     .replace(/[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f]/g, "");
 }
 
-export default function TerminalPanel({ result, isRunning, statusMsg, selectedCompiler }) {
+export default function TerminalPanel({ result, isRunning, statusMsg, selectedCompiler, stdinValue, onStdinChange }) {
   const { isMobile } = useBreakpoint();
+  const [stdinOpen, setStdinOpen] = useState(false);
   const containerRef = useRef(null);
   const termRef = useRef(null);
   const fitAddonRef = useRef(null);
+
+  const handleStdinChange = (value) => {
+    onStdinChange?.(value);
+  };
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -126,6 +131,9 @@ export default function TerminalPanel({ result, isRunning, statusMsg, selectedCo
 
     term.writeln("");
     term.writeln(`\x1b[2m──────────── run at ${escapeXterm(result.timestamp)} ────────────\x1b[0m`);
+    if (result.stdinUsed) {
+      term.writeln(`\x1b[2m// stdin: ${escapeXterm(result.stdinLineCount)} line(s) provided\x1b[0m`);
+    }
     term.writeln("");
 
     if (result.header) {
@@ -248,6 +256,40 @@ export default function TerminalPanel({ result, isRunning, statusMsg, selectedCo
 
         <button
           type="button"
+          onClick={() => setStdinOpen((open) => !open)}
+          title="Provide standard input (stdin) for your program"
+          style={{
+            fontFamily: "JetBrains Mono, monospace",
+            fontSize: 10,
+            padding: "2px 8px",
+            background: stdinOpen ? "var(--accent)" : "none",
+            border: "1px solid",
+            borderColor: stdinOpen ? "var(--accent)" : "#2a2a2a",
+            color: stdinOpen ? "#000" : "#555",
+            cursor: "pointer",
+            borderRadius: 3,
+            letterSpacing: "0.03em",
+            transition: "all 150ms",
+            marginRight: 4,
+          }}
+          onMouseEnter={(e) => {
+            if (!stdinOpen) {
+              e.currentTarget.style.borderColor = "var(--accent)";
+              e.currentTarget.style.color = "var(--accent)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!stdinOpen) {
+              e.currentTarget.style.borderColor = "#2a2a2a";
+              e.currentTarget.style.color = "#555";
+            }
+          }}
+        >
+          {stdinOpen ? "stdin ▲" : "stdin ▼"}
+        </button>
+
+        <button
+          type="button"
           onClick={() => {
             termRef.current?.clear();
             termRef.current?.writeln("\x1b[2m// terminal cleared\x1b[0m");
@@ -274,6 +316,93 @@ export default function TerminalPanel({ result, isRunning, statusMsg, selectedCo
           clear
         </button>
       </div>
+
+      {stdinOpen && (
+        <div
+          style={{
+            borderBottom: "1px solid #1e1e1e",
+            background: "#0d0d0d",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "4px 12px",
+              gap: 8,
+              borderBottom: "1px solid #161616",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "JetBrains Mono, monospace",
+                fontSize: 10,
+                color: "var(--accent)",
+                opacity: 0.6,
+                letterSpacing: "0.05em",
+              }}
+            >
+              // STDIN
+            </span>
+            <span
+              style={{
+                fontFamily: "JetBrains Mono, monospace",
+                fontSize: 9,
+                color: "#333",
+              }}
+            >
+              one value per line · fed to your program in order
+            </span>
+            {stdinValue.trim() && (
+              <button
+                type="button"
+                onClick={() => handleStdinChange("")}
+                style={{
+                  marginLeft: "auto",
+                  background: "none",
+                  border: "none",
+                  color: "#333",
+                  cursor: "pointer",
+                  fontFamily: "JetBrains Mono, monospace",
+                  fontSize: 9,
+                  padding: "0 4px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#ff3b3b";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#333";
+                }}
+              >
+                clear
+              </button>
+            )}
+          </div>
+
+          <textarea
+            value={stdinValue}
+            onChange={(e) => handleStdinChange(e.target.value)}
+            placeholder={"42\nhello world\nsome other input"}
+            spellCheck={false}
+            rows={4}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              resize: "none",
+              fontFamily: "JetBrains Mono, monospace",
+              fontSize: 12,
+              lineHeight: 1.6,
+              color: "#aaa",
+              padding: "8px 12px",
+              caretColor: "var(--accent)",
+            }}
+          />
+        </div>
+      )}
 
       <div ref={containerRef} className="terminal-output" style={{ flex: 1, padding: "4px 4px 0 4px" }} />
     </motion.div>

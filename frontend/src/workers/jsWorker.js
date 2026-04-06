@@ -1,8 +1,24 @@
 self.onmessage = function (e) {
-  const { code } = e.data;
+  const { code, stdin = "" } = e.data;
   const output = [];
   const errors = [];
   let timedOut = false;
+
+  const stdinLines = String(stdin).split("\n");
+  let stdinCursor = 0;
+
+  // Node.js modules (require("readline")) are unavailable in this sandbox.
+  // We only emulate line-based stdin access for prompt()/readline()/process.stdin helpers.
+  function readStdinLine() {
+    if (stdinCursor < stdinLines.length) {
+      const line = stdinLines[stdinCursor];
+      stdinCursor += 1;
+      output.push(line);
+      return line;
+    }
+    // Competitive programming style behavior: exhausted stdin returns empty string.
+    return "";
+  }
 
   const killTimer = setTimeout(() => {
     timedOut = true;
@@ -36,7 +52,33 @@ self.onmessage = function (e) {
   }
 
   try {
-    const fn = new Function("console", "alert", "confirm", "prompt", "fetch", `"use strict";\n${code}`);
+    const fakeProcess = {
+      stdin: {
+        readline: () => readStdinLine(),
+        read: () => {
+          if (stdinCursor >= stdinLines.length) {
+            return "";
+          }
+          const remaining = stdinLines.slice(stdinCursor).join("\n");
+          stdinCursor = stdinLines.length;
+          if (remaining) {
+            output.push(remaining);
+          }
+          return remaining;
+        },
+      },
+    };
+
+    const fn = new Function(
+      "console",
+      "alert",
+      "confirm",
+      "prompt",
+      "readline",
+      "process",
+      "fetch",
+      `"use strict";\n${code}`
+    );
     fn(
       fakeConsole,
       (msg) => output.push(`[alert] ${msg}`),
@@ -45,9 +87,13 @@ self.onmessage = function (e) {
         return false;
       },
       (msg) => {
-        output.push(`[prompt] ${msg}`);
-        return "";
+        if (msg) {
+          output.push(String(msg));
+        }
+        return readStdinLine();
       },
+      readStdinLine,
+      fakeProcess,
       () => Promise.reject(new Error("fetch is disabled in sandbox"))
     );
 

@@ -27,6 +27,7 @@ export default function App() {
   const [code, setCode] = useState(DEFAULT_LANGUAGE.defaultCode);
   const [selectedCompiler, setSelectedCompiler] = useState(COMPILERS[0]);
   const [selectedLanguage, setSelectedLanguage] = useState(DEFAULT_LANGUAGE);
+  const [stdinValue, setStdinValue] = useState("");
   const [rightTab, setRightTab] = useState("unpilot");
   const [tokenCount, setTokenCount] = useState(0);
   const touchStartXRef = useRef(null);
@@ -89,9 +90,13 @@ export default function App() {
   };
 
   const handleRun = useCallback(() => {
-    run(code, selectedLanguage.id, selectedCompiler.id);
+    run(code, selectedLanguage.id, selectedCompiler.id, stdinValue);
     setRightTab("terminal");
-  }, [code, selectedLanguage.id, selectedCompiler.id, run]);
+  }, [code, selectedLanguage.id, selectedCompiler.id, stdinValue, run]);
+
+  useEffect(() => {
+    setStdinValue("");
+  }, [selectedLanguage.id]);
 
   const handleInsertCode = useCallback(
     (generatedCode) => {
@@ -272,6 +277,8 @@ export default function App() {
                   isRunning={isRunning}
                   statusMsg={statusMsg}
                   selectedCompiler={selectedCompiler}
+                  stdinValue={stdinValue}
+                  onStdinChange={setStdinValue}
                 />
               </div>
 

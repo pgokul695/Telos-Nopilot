@@ -67,7 +67,7 @@ const FLAVORS = {
   },
 };
 
-async function runWithWandbox(code, language) {
+async function runWithWandbox(code, language, stdin = "") {
   const lang = LANGUAGE_MAP[language];
 
   let response;
@@ -82,6 +82,7 @@ async function runWithWandbox(code, language) {
         compiler: lang.wandboxCompiler,
         code,
         options: lang.wandboxOptions || "",
+        stdin,
       }),
     });
   } catch {
@@ -151,7 +152,7 @@ async function runWithWandbox(code, language) {
   };
 }
 
-function runWithWorker(workerUrl, code, onStatus) {
+function runWithWorker(workerUrl, code, stdin = "", onStatus) {
   return new Promise((resolve) => {
     const worker = new Worker(workerUrl, { type: "classic" });
 
@@ -176,7 +177,7 @@ function runWithWorker(workerUrl, code, onStatus) {
       resolve({ stdout: "", stderr: err.message, exit_code: 1, timed_out: false });
     };
 
-    worker.postMessage({ code });
+    worker.postMessage({ code, stdin });
   });
 }
 
@@ -190,7 +191,7 @@ function getPyodideWorker() {
   return pyodideWorker;
 }
 
-function runPyodide(code, onStatus) {
+function runPyodide(code, stdin = "", onStatus) {
   return new Promise((resolve) => {
     const worker = getPyodideWorker();
 
@@ -218,7 +219,7 @@ function runPyodide(code, onStatus) {
     };
 
     worker.addEventListener("message", handler);
-    worker.postMessage({ code });
+    worker.postMessage({ code, stdin });
   });
 }
 
@@ -228,7 +229,7 @@ export function useExecutor() {
   const [statusMsg, setStatusMsg] = useState("");
   const jsWorkerUrlRef = useRef(null);
 
-  const run = useCallback(async (code, language, compilerId) => {
+  const run = useCallback(async (code, language, compilerId, stdin = "") => {
     if (!code.trim()) {
       return;
     }
@@ -255,13 +256,13 @@ export function useExecutor() {
         }
 
         setStatusMsg("Executing...");
-        rawResult = await runWithWorker(jsWorkerUrlRef.current, code, setStatusMsg);
+        rawResult = await runWithWorker(jsWorkerUrlRef.current, code, stdin, setStatusMsg);
       } else if (lang.engine === "pyodide") {
         setStatusMsg("Loading Python 3.11 runtime (~10MB, first run only)...");
-        rawResult = await runPyodide(code, setStatusMsg);
+        rawResult = await runPyodide(code, stdin, setStatusMsg);
       } else if (lang.engine === "wandbox") {
         setStatusMsg("Sending to compiler...");
-        rawResult = await runWithWandbox(code, language);
+        rawResult = await runWithWandbox(code, language, stdin);
       }
 
       const flavorFn = FLAVORS[compilerId] || FLAVORS.syntaxterror;
@@ -271,6 +272,8 @@ export function useExecutor() {
         ...rawResult,
         header,
         footer,
+        stdinUsed: stdin.trim().length > 0,
+        stdinLineCount: stdin.trim() ? stdin.trim().split("\n").length : 0,
         language,
         compilerId,
         timestamp: new Date().toLocaleTimeString(),
@@ -284,6 +287,8 @@ export function useExecutor() {
         timed_out: false,
         header: "",
         footer: "",
+        stdinUsed: stdin.trim().length > 0,
+        stdinLineCount: stdin.trim() ? stdin.trim().split("\n").length : 0,
         language,
         compilerId,
         timestamp: new Date().toLocaleTimeString(),

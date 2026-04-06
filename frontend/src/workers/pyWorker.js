@@ -82,7 +82,7 @@ async function loadRequiredPackages(py, code) {
 }
 
 self.onmessage = async function (e) {
-  const { code } = e.data;
+  const { code, stdin = "" } = e.data;
 
   try {
     const py = await ensurePyodide();
@@ -103,6 +103,8 @@ self.onmessage = async function (e) {
     let exit_code = 0;
     try {
       await loadRequiredPackages(py, code);
+      const stdinLiteral = JSON.stringify(stdin);
+      await py.runPythonAsync(`import sys, io\nsys.stdin = io.StringIO(${stdinLiteral})`);
       await py.runPythonAsync(code);
     } catch (err) {
       exit_code = 1;
