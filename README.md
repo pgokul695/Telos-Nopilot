@@ -6,14 +6,14 @@ Nopilot is a satirical AI code editor that runs real code, roasts your code, and
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-111111?style=for-the-badge)](https://telos.gokulp.online/)
 [![MIT License](https://img.shields.io/badge/License-MIT-00ff88?style=for-the-badge)](../LICENSE)
-[![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-f97316?style=for-the-badge)](https://www.anthropic.com)
+[![Build with Gemini](https://img.shields.io/badge/Build%20with-Gemini-4285F4?style=for-the-badge)](https://aistudio.google.com/)
 
 ## Header
 
 - Project: NOPILOT
 - Tagline: NOT YOUR COPILOT
 - Description: Satirical AI code editor for demos, hackathons, and intentional chaos.
-- Badges: Live Demo, MIT License, Built with Claude
+- Badges: Live Demo, MIT License, Build with Gemini
 
 ## What Is This
 
@@ -104,7 +104,7 @@ Each language writes to the terminal output panel with stdout, stderr, and exit 
 | Python Execution | Pyodide | In-browser Python runtime via WASM |
 | C++ Execution | Wandbox | Remote compile and run |
 | Backend API | FastAPI | SSE proxy endpoint and prompt routing |
-| LLM | Anthropic Claude API | Roast and generated code output |
+| LLM | Google AI Studio API (Gemini) | Roast and generated code output |
 | Styling | Custom CSS variables | Visual theme and persona-reactive colors |
 
 ## Quick Start
@@ -113,7 +113,7 @@ Each language writes to the terminal output panel with stdout, stderr, and exit 
 
 - Node.js 18+
 - Python 3.10+
-- Anthropic API key -> https://console.anthropic.com
+- Google AI Studio API key -> https://aistudio.google.com/
 
 ### 1. Clone
 
@@ -140,7 +140,7 @@ python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# Set ANTHROPIC_API_KEY=sk-ant-... in .env
+# Set GOOGLE_API_KEY=your_google_ai_studio_key in .env
 uvicorn main:app --reload --port 8000
 # -> http://localhost:8000
 ```
@@ -197,7 +197,7 @@ MIT
 
 ## Acknowledgements
 
-- Anthropic Claude API
+- Google AI Studio API (Gemini)
 - Monaco Editor
 - Pyodide
 - Wandbox

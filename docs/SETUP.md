@@ -4,8 +4,8 @@
 
 - Node.js 18+
 - Python 3.10+
-- Anthropic API key from https://console.anthropic.com
-- Internet connection (required for Wandbox C++ and Claude API calls)
+- Google AI Studio API key from https://aistudio.google.com/
+- Internet connection (required for Wandbox C++ and Gemini API calls)
 
 ## Repository Clone
 
@@ -35,13 +35,13 @@ http://localhost:3001
 cd backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install fastapi uvicorn anthropic python-dotenv
+pip install fastapi uvicorn google-generativeai python-dotenv
 ```
 
 Create backend environment file:
 
 ```env
-ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=your_google_ai_studio_key
 ```
 
 Start backend:
@@ -60,7 +60,7 @@ http://localhost:8000
 
 | Variable | Location | Required | Description |
 |---|---|---|---|
-| ANTHROPIC_API_KEY | backend/.env | Yes | Anthropic API key used by FastAPI backend |
+| GOOGLE_API_KEY | backend/.env | Yes | Google AI Studio API key used by FastAPI backend |
 | VITE_API_URL | frontend/.env | No | Backend base URL, defaults to http://localhost:8000 |
 
 ## Frontend Build
@@ -82,7 +82,7 @@ Serve dist with any static hosting platform.
 1. Backend is running on port 8000.
 2. Frontend is running on port 3001.
 3. Frontend points to backend URL through VITE_API_URL when needed.
-4. Anthropic key is present in backend environment.
+4. Google AI Studio API key is present in backend environment.
 
 ## Common Local Issues
 

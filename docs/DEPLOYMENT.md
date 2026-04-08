@@ -54,21 +54,21 @@ builder = "nixpacks"
 startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
 ```
 
-Set ANTHROPIC_API_KEY in Railway environment variables.
+Set GOOGLE_API_KEY in Railway environment variables.
 
 ### Render
 
 - Create new Web Service and set root directory to backend/
 - Build command: pip install -r requirements.txt
 - Start command: uvicorn main:app --host 0.0.0.0 --port $PORT
-- Add ANTHROPIC_API_KEY environment variable
+- Add GOOGLE_API_KEY environment variable
 
 ### Fly.io
 
 ```bash
 cd backend
 fly launch
-fly secrets set ANTHROPIC_API_KEY=sk-ant-...
+fly secrets set GOOGLE_API_KEY=your_google_ai_studio_key
 fly deploy
 ```
 
@@ -111,6 +111,6 @@ app.add_middleware(
 1. Frontend built and deployed from dist.
 2. Backend is reachable over HTTPS.
 3. VITE_API_URL points to backend base URL.
-4. ANTHROPIC_API_KEY is set only on backend.
+4. GOOGLE_API_KEY is set only on backend.
 5. Backend CORS includes frontend production origin.
 6. Health check a full stream from frontend UI before release.
