@@ -14,7 +14,7 @@ from pydantic import BaseModel
 load_dotenv()
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 model = genai.GenerativeModel("gemma-3-27b-it")
-
+port = 3000
 SYSTEM_PROMPTS = {
     "segfault": """You are SegFault.ai, an AI that specializes in morally reprehensible C++ code.
 You have strong opinions about everything the user has written and none of them are positive.
