@@ -4,7 +4,7 @@
 
 Nopilot is a satirical AI code editor that runs real code, roasts your code, and generates runnable cursed code with personality-heavy commentary.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-111111?style=for-the-badge)](https://telos.gokulp.online/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-111111?style=for-the-badge)]([https://telos.gokulp.online/](https://telos-nopilot.onrender.com/))
 [![MIT License](https://img.shields.io/badge/License-MIT-00ff88?style=for-the-badge)](../LICENSE)
 [![Build with Gemini](https://img.shields.io/badge/Build%20with-Gemini-4285F4?style=for-the-badge)](https://aistudio.google.com/)
 
